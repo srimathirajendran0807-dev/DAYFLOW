@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+{% block title %}My Dashboard{% endblock %}
+{% block content %}
+
+<div class="d-flex flex-wrap align-items-center justify-content-between mb-4">
+    <div class="d-flex align-items-center gap-3">
+        <img src="{{ url_for('static', filename='uploads/' + employee.profile_picture) if employee.profile_picture != 'default.png' else url_for('static', filename='img/default-avatar.png') }}"
+             onerror="this.src='https://ui-avatars.com/api/?name={{ employee.first_name }}+{{ employee.last_name }}&background=2A3F73&color=fff'"
+             class="rounded-circle df-avatar" alt="Profile picture">
+        <div>
+            <h3 class="mb-0 fw-bold">Welcome, {{ employee.full_name }}</h3>
+            <p class="text-muted mb-0">{{ employee.designation or 'Employee' }} &middot; {{ employee.department or 'Unassigned' }}</p>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="card df-card stat-card h-100">
+            <div class="card-body">
+                <i class="bi bi-person-badge fs-3 text-df-primary"></i>
+                <h6 class="mt-2 mb-0 text-muted">My Profile</h6>
+                <a href="{{ url_for('employee.profile') }}" class="stretched-link small">View / Edit</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card df-card stat-card h-100">
+            <div class="card-body">
+                <i class="bi bi-calendar-check fs-3 text-success"></i>
+                <h6 class="mt-2 mb-0 text-muted">Today's Status</h6>
+                <p class="fw-bold mb-0">{{ today_attendance.status if today_attendance else 'Not marked' }}</p>
+                <a href="{{ url_for('attendance.view_attendance') }}" class="stretched-link small">Go to attendance</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card df-card stat-card h-100">
+            <div class="card-body">
+                <i class="bi bi-envelope-paper fs-3 text-warning"></i>
+                <h6 class="mt-2 mb-0 text-muted">Leave Requests</h6>
+                <p class="fw-bold mb-0">{{ pending_leaves }} pending</p>
+                <a href="{{ url_for('leave.view_leaves') }}" class="stretched-link small">View leave</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card df-card stat-card h-100">
+            <div class="card-body">
+                <i class="bi bi-cash-coin fs-3 text-df-primary"></i>
+                <h6 class="mt-2 mb-0 text-muted">Salary</h6>
+                <p class="fw-bold mb-0">
+                    {% if latest_payroll %}₹{{ '%.2f'|format(latest_payroll.net_salary) }}{% else %}Not available{% endif %}
+                </p>
+                <a href="{{ url_for('employee.payroll') }}" class="stretched-link small">View payroll</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-7">
+        <div class="card df-card h-100">
+            <div class="card-header bg-white fw-semibold">Today's Attendance</div>
+            <div class="card-body">
+                {% if today_attendance %}
+                <div class="row text-center">
+                    <div class="col-4">
+                        <p class="text-muted mb-1 small">Status</p>
+                        <span class="badge df-badge-{{ today_attendance.status|lower|replace(' ', '-') }}">{{ today_attendance.status }}</span>
+                    </div>
+                    <div class="col-4">
+                        <p class="text-muted mb-1 small">Check-in</p>
+                        <p class="fw-bold mb-0">{{ today_attendance.check_in.strftime('%I:%M %p') if today_attendance.check_in else '--' }}</p>
+                    </div>
+                    <div class="col-4">
+                        <p class="text-muted mb-1 small">Check-out</p>
+                        <p class="fw-bold mb-0">{{ today_attendance.check_out.strftime('%I:%M %p') if today_attendance.check_out else '--' }}</p>
+                    </div>
+                </div>
+                {% else %}
+                <p class="text-muted mb-3">You haven't checked in today.</p>
+                {% endif %}
+                <form method="POST" action="{{ url_for('attendance.check_in') }}" class="d-inline">
+                    <button class="btn btn-df-primary btn-sm" {% if today_attendance %}disabled{% endif %}>
+                        <i class="bi bi-box-arrow-in-right"></i> Check In
+                    </button>
+                </form>
+                <form method="POST" action="{{ url_for('attendance.check_out') }}" class="d-inline">
+                    <button class="btn btn-outline-secondary btn-sm" {% if not today_attendance or today_attendance.check_out %}disabled{% endif %}>
+                        <i class="bi bi-box-arrow-left"></i> Check Out
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card df-card mt-3">
+            <div class="card-header bg-white fw-semibold">Recent Leave Activity</div>
+            <div class="card-body">
+                {% if recent_leaves %}
+                <ul class="list-group list-group-flush">
+                    {% for l in recent_leaves %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                        <span>{{ l.leave_type }} leave &middot; {{ l.from_date }} to {{ l.to_date }}</span>
+                        <span class="badge df-badge-{{ l.status|lower }}">{{ l.status }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-muted mb-0">No leave requests yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="card df-card h-100">
+            <div class="card-header bg-white fw-semibold">Notifications</div>
+            <div class="card-body">
+                {% if notifications %}
+                <ul class="list-group list-group-flush">
+                    {% for n in notifications %}
+                    <li class="list-group-item px-0 {{ 'fw-semibold' if not n.is_read }}">
+                        <i class="bi bi-bell{{ '-fill text-df-primary' if not n.is_read else '' }} me-1"></i>
+                        {{ n.message }}
+                        <div class="text-muted small">{{ n.created_at.strftime('%d %b %Y, %I:%M %p') }}</div>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-muted mb-0">No notifications yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

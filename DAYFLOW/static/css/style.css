@@ -1,0 +1,60 @@
+:root {
+    --df-primary: #2A3F73;
+    --df-primary-dark: #1D2C52;
+    --df-accent: #F2A93B;
+    --df-bg: #F4F6FB;
+}
+
+body {
+    background-color: var(--df-bg);
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.text-df-primary { color: var(--df-primary) !important; }
+
+.df-navbar {
+    background: linear-gradient(90deg, var(--df-primary) 0%, var(--df-primary-dark) 100%);
+}
+
+.btn-df-primary {
+    background-color: var(--df-primary);
+    border-color: var(--df-primary);
+    color: #fff;
+}
+.btn-df-primary:hover {
+    background-color: var(--df-primary-dark);
+    border-color: var(--df-primary-dark);
+    color: #fff;
+}
+
+.df-card {
+    border: none;
+    border-radius: 0.75rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+}
+
+.stat-card { transition: transform 0.15s ease; }
+.stat-card:hover { transform: translateY(-3px); }
+
+.df-avatar {
+    width: 56px;
+    height: 56px;
+    object-fit: cover;
+    border: 2px solid var(--df-primary);
+}
+
+.df-avatar-lg {
+    width: 130px;
+    height: 130px;
+    object-fit: cover;
+    border: 3px solid var(--df-primary);
+}
+
+.auth-wrapper { min-height: 85vh; }
+
+.badge.df-badge-present, .badge.df-badge-approved { background-color: #28a745; }
+.badge.df-badge-absent, .badge.df-badge-rejected { background-color: #dc3545; }
+.badge.df-badge-half-day { background-color: #fd7e14; }
+.badge.df-badge-leave, .badge.df-badge-pending { background-color: #ffc107; color: #212529; }
+
+.nav-pills .nav-link.active { background-color: var(--df-primary); }

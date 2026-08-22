@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% block title %}Payroll{% endblock %}
+{% block content %}
+
+{% if is_admin %}
+<h3 class="fw-bold mb-4"><i class="bi bi-cash-coin"></i> Payroll Management</h3>
+
+<form method="GET" class="row g-2 mb-3">
+    <div class="col-auto">
+        <select name="month" class="form-select">
+            {% for m in range(1, 13) %}
+            <option value="{{ m }}" {{ 'selected' if m == pay_month }}>{{ m }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-auto">
+        <input type="number" name="year" class="form-control" value="{{ pay_year }}" style="width: 110px;">
+    </div>
+    <div class="col-auto">
+        <button class="btn btn-df-primary">View Period</button>
+    </div>
+</form>
+
+<div class="card df-card">
+    <div class="table-responsive">
+        <table class="table align-middle mb-0">
+            <thead class="table-light">
+                <tr><th>Employee</th><th>Basic</th><th>Allowances</th><th>Deductions</th><th>Net Salary</th><th>Action</th></tr>
+            </thead>
+            <tbody>
+                {% for emp in employees %}
+                {% set rec = records_by_emp.get(emp.id) %}
+                <tr>
+                    <td>{{ emp.full_name }}</td>
+                    <td>{{ '%.2f'|format(rec.basic_salary) if rec else '—' }}</td>
+                    <td>{{ '%.2f'|format(rec.allowances) if rec else '—' }}</td>
+                    <td>{{ '%.2f'|format(rec.deductions) if rec else '—' }}</td>
+                    <td class="fw-bold">{{ '%.2f'|format(rec.net_salary) if rec else '—' }}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#payModal{{ emp.id }}">
+                            {{ 'Edit' if rec else 'Add' }}
+                        </button>
+                        <div class="modal fade" id="payModal{{ emp.id }}" tabindex="-1">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <form method="POST" action="{{ url_for('admin.payroll_update') }}">
+                                        <input type="hidden" name="employee_id" value="{{ emp.id }}">
+                                        <input type="hidden" name="pay_month" value="{{ pay_month }}">
+                                        <input type="hidden" name="pay_year" value="{{ pay_year }}">
+                                        <div class="modal-header">
+                                            <h6 class="modal-title">Update Payroll — {{ emp.full_name }}</h6>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="mb-2">
+                                                <label class="form-label">Basic Salary</label>
+                                                <input type="number" step="0.01" min="0" class="form-control" name="basic_salary" value="{{ rec.basic_salary if rec else 0 }}" required>
+                                            </div>
+                                            <div class="mb-2">
+                                                <label class="form-label">Allowances</label>
+                                                <input type="number" step="0.01" min="0" class="form-control" name="allowances" value="{{ rec.allowances if rec else 0 }}">
+                                            </div>
+                                            <div class="mb-2">
+                                                <label class="form-label">Deductions</label>
+                                                <input type="number" step="0.01" min="0" class="form-control" name="deductions" value="{{ rec.deductions if rec else 0 }}">
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="submit" class="btn btn-df-primary">Save</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="6" class="text-center text-muted py-4">No employees found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% else %}
+<h3 class="fw-bold mb-4"><i class="bi bi-cash-coin"></i> My Payroll</h3>
+<p class="text-muted"><i class="bi bi-lock"></i> This information is read-only. Contact HR for corrections.</p>
+
+<div class="card df-card">
+    <div class="table-responsive">
+        <table class="table align-middle mb-0">
+            <thead class="table-light">
+                <tr><th>Month</th><th>Year</th><th>Basic</th><th>Allowances</th><th>Deductions</th><th>Net Salary</th></tr>
+            </thead>
+            <tbody>
+                {% for r in records %}
+                <tr>
+                    <td>{{ r.pay_month }}</td>
+                    <td>{{ r.pay_year }}</td>
+                    <td>{{ '%.2f'|format(r.basic_salary) }}</td>
+                    <td>{{ '%.2f'|format(r.allowances) }}</td>
+                    <td>{{ '%.2f'|format(r.deductions) }}</td>
+                    <td class="fw-bold">{{ '%.2f'|format(r.net_salary) }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="6" class="text-center text-muted py-4">No payroll records yet. Check back after HR processes your salary.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}

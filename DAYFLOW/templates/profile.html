@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% block title %}Profile{% endblock %}
+{% block content %}
+
+<h3 class="fw-bold mb-4"><i class="bi bi-person"></i> {{ 'Employee Profile' if admin_view else 'My Profile' }}</h3>
+
+<div class="row g-3">
+    <div class="col-lg-4">
+        <div class="card df-card text-center">
+            <div class="card-body">
+                <img src="{{ url_for('static', filename='uploads/' + employee.profile_picture) if employee.profile_picture != 'default.png' else '' }}"
+                     onerror="this.src='https://ui-avatars.com/api/?name={{ employee.first_name }}+{{ employee.last_name }}&size=140&background=2A3F73&color=fff'"
+                     class="rounded-circle df-avatar-lg mb-3" alt="Profile picture">
+                <h5 class="mb-0">{{ employee.full_name }}</h5>
+                <p class="text-muted mb-1">{{ employee.designation or 'Employee' }}</p>
+                <p class="text-muted small">Employee ID: {{ employee.employee_id }}</p>
+
+                {% if not admin_view %}
+                <form method="POST" action="{{ url_for('employee.profile') }}" enctype="multipart/form-data" class="mt-3">
+                    <input type="file" name="profile_picture" class="form-control form-control-sm mb-2" accept="image/*">
+                    <input type="hidden" name="phone" value="{{ employee.phone or '' }}">
+                    <input type="hidden" name="address" value="{{ employee.address or '' }}">
+                    <button type="submit" class="btn btn-sm btn-outline-primary w-100">Update Picture</button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-8">
+        <div class="card df-card">
+            <div class="card-header bg-white fw-semibold">Personal & Job Details</div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('admin.employee_detail', emp_id=employee.id) if admin_view else url_for('employee.profile') }}">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">First Name</label>
+                            <input type="text" class="form-control" name="first_name" value="{{ employee.first_name }}" {% if not admin_view %}disabled{% endif %}>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Last Name</label>
+                            <input type="text" class="form-control" name="last_name" value="{{ employee.last_name }}" {% if not admin_view %}disabled{% endif %}>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Phone</label>
+                            <input type="text" class="form-control" name="phone" value="{{ employee.phone or '' }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Date of Birth</label>
+                            <input type="date" class="form-control" name="date_of_birth" value="{{ employee.date_of_birth or '' }}" {% if not admin_view %}disabled{% endif %}>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Address</label>
+                        <textarea class="form-control" name="address" rows="2">{{ employee.address or '' }}</textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Department</label>
+                            <input type="text" class="form-control" name="department" value="{{ employee.department or '' }}" {% if not admin_view %}disabled{% endif %}>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Designation</label>
+                            <input type="text" class="form-control" name="designation" value="{{ employee.designation or '' }}" {% if not admin_view %}disabled{% endif %}>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Joining Date</label>
+                        <input type="text" class="form-control" value="{{ employee.joining_date or '' }}" disabled>
+                    </div>
+
+                    {% if not admin_view %}
+                    <p class="text-muted small"><i class="bi bi-info-circle"></i> You can update your Phone, Address, and Profile Picture. Other fields can only be changed by HR/Admin.</p>
+                    {% endif %}
+
+                    <button type="submit" class="btn btn-df-primary">Save Changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

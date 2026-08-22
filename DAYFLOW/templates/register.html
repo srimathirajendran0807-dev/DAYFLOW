@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block title %}Register{% endblock %}
+{% block content %}
+<div class="row justify-content-center align-items-center auth-wrapper">
+    <div class="col-11 col-sm-9 col-md-7 col-lg-5">
+        <div class="card df-card shadow-sm">
+            <div class="card-body p-4">
+                <div class="text-center mb-4">
+                    <h2 class="fw-bold text-df-primary mb-0"><i class="bi bi-diagram-3-fill"></i> DAYFLOW</h2>
+                    <p class="text-muted small">Create your account</p>
+                </div>
+                <form method="POST" action="{{ url_for('auth.register') }}" novalidate>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">First Name</label>
+                            <input type="text" class="form-control" name="first_name" value="{{ form.first_name if form }}" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Last Name</label>
+                            <input type="text" class="form-control" name="last_name" value="{{ form.last_name if form }}" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Employee ID</label>
+                        <input type="text" class="form-control" name="employee_id" value="{{ form.employee_id if form }}" placeholder="e.g. EMP002" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email address</label>
+                        <input type="email" class="form-control" name="email" value="{{ form.email if form }}" required>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Password</label>
+                            <input type="password" class="form-control" name="password" required minlength="6">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Confirm Password</label>
+                            <input type="password" class="form-control" name="confirm_password" required minlength="6">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Role</label>
+                        <select class="form-select" name="role" required>
+                            <option value="employee" selected>Employee</option>
+                            <option value="admin">Admin / HR Officer</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-df-primary w-100">Create Account</button>
+                </form>
+                <p class="text-center mt-3 mb-0 small">
+                    Already have an account? <a href="{{ url_for('auth.login') }}">Login here</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
